@@ -66,12 +66,12 @@ export class AuthService {
     // return the saved user token
     return this.signToken(user.id, user.name, user.email, user.roleId);
   }
-  signToken(
+  async signToken(
     userId: number,
     name: string,
     email: string,
     roleId: number,
-  ): Promise<string> {
+  ): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,
       name,
@@ -80,9 +80,11 @@ export class AuthService {
     };
     const secret = this.config.get('JWT_SECRET');
 
-    return this.jwt.signAsync(payload, {
+    const token = await this.jwt.signAsync(payload, {
       expiresIn: '15m',
       secret: secret,
     });
+
+    return { access_token: token };
   }
 }
