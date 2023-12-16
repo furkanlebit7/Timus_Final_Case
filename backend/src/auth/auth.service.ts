@@ -1,16 +1,12 @@
-import {
-  ConflictException,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AuthDto } from './dto';
+import { SignInDto, SignUpDto } from './dto';
 import * as argon from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 @Injectable({})
 export class AuthService {
   constructor(private prisma: PrismaService) {}
-  async signup(dto: AuthDto) {
+  async signup(dto: SignUpDto) {
     // generate the password hash
     const password = await argon.hash(dto.password);
 
@@ -44,7 +40,28 @@ export class AuthService {
     }
   }
 
-  signin() {
-    return { msg: 'I am signin' };
+  async signin(dto: SignInDto) {
+    //find the user by email
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: dto.email,
+      },
+    });
+    //if user does not exist throw error
+    if (!user) {
+      throw new ForbiddenException('Email or password is incorrect');
+    }
+
+    //compare password
+    const pwMatches = await argon.verify(user.password, dto.password);
+
+    //if password does not match throw error
+    if (!pwMatches) {
+      throw new ForbiddenException('Email or password is incorrect');
+    }
+
+    //send back the user
+    delete user.password;
+    return user;
   }
 }
