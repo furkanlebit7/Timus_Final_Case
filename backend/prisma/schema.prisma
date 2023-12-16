@@ -19,14 +19,17 @@ model Role {
 
 // User model 
 model User {
-  id           Int      @id @default(autoincrement())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  name         String
-  email        String   @unique
-  password     String
-  roleId       Int // Foreign key for the Role
-  roleRelation Role     @relation(fields: [roleId], references: [id])
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  email     String   @unique
+  password  String
+
+  roleId Int // Foreign key for the Role
+  role   Role @relation(fields: [roleId], references: [id])
+
+  @@map("users")
 }
 
 // FactoryList model
@@ -38,6 +41,8 @@ model Factory {
   employeeCount     Int
   isFreeMember      Boolean
   factoryDetail     FactoryDetail?
+
+  @@map("factory_list")
 }
 
 // FactoryDetail model
