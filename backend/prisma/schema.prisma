@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Role model
+model Role {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
+}
+
+// User model 
+model User {
+  id           Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  name         String
+  email        String   @unique
+  password     String
+  roleId       Int // Foreign key for the Role
+  roleRelation Role     @relation(fields: [roleId], references: [id])
+}
+
+// FactoryList model
+model Factory {
+  id                Int            @id @default(autoincrement())
+  companyName       String
+  membershipDate    DateTime
+  membershipEndDate DateTime
+  employeeCount     Int
+  isFreeMember      Boolean
+  factoryDetail     FactoryDetail?
+}
+
+// FactoryDetail model
+model FactoryDetail {
+  id              Int      @id @default(autoincrement())
+  usingDepartment String
+  dateRange       DateTime
+  usageKw         Int
+  usageCost       Int
+  discountedPrice Boolean
+
+  // Foreign key to relate FactoryDetail to FactoryList
+  factoryId       Int     @unique
+  factoryRelation Factory @relation(fields: [factoryId], references: [id], onDelete: Cascade)
+}
