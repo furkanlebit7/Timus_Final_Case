@@ -12,17 +12,17 @@ export class FactoryDetailService {
   }
 
   // // Gets a factory by id from Prisma
-  // async getFactoryDetailById(id: string) {
-  //   const factory = await this.prisma.factory.findUnique({
-  //     where: { id: Number(id) },
-  //   });
+  async getFactoryDetailById(id: string) {
+    const factory = await this.prisma.factoryDetail.findUnique({
+      where: { id: Number(id) },
+    });
 
-  //   if (!factory) {
-  //     throw new NotFoundException('Factory Not Found');
-  //   }
+    if (!factory) {
+      throw new NotFoundException('Factory Not Found');
+    }
 
-  //   return factory;
-  // }
+    return factory;
+  }
 
   // // Inserts a factory into Prisma
   async insertFactoryDetail(factoryDetail: FactoryDetailDto) {
@@ -43,29 +43,37 @@ export class FactoryDetailService {
   }
 
   // // Updates a factory in Prisma
-  // async updateFactoryDetail(id: string, factory: FactoryDetailDto) {
-  //   const updatedFactory = await this.prisma.factory.update({
-  //     where: { id: Number(id) },
-  //     data: factory,
-  //   });
+  async updateFactoryDetail(id: string, factory: FactoryDetailDto) {
+    const factoryDetail = await this.prisma.factoryDetail.findUnique({
+      where: { id: Number(id) },
+    });
 
-  //   if (!updatedFactory) {
-  //     throw new NotFoundException('Factory Not Found');
-  //   }
+    if (!factoryDetail) {
+      throw new NotFoundException('Factory Not Found');
+    }
 
-  //   return updatedFactory;
-  // }
+    const updatedFactory = await this.prisma.factoryDetail.update({
+      where: { id: Number(id) },
+      data: factory,
+    });
+
+    if (!updatedFactory) {
+      throw new NotFoundException('Factory Not Found');
+    }
+
+    return updatedFactory;
+  }
 
   // // Deletes a factory from Prisma
-  // async deleteFactoryDetail(id: string) {
-  //   const deletedFactory = await this.prisma.factory.delete({
-  //     where: { id: Number(id) },
-  //   });
+  async deleteFactoryDetail(id: string) {
+    const deletedFactory = await this.prisma.factoryDetail.delete({
+      where: { id: Number(id) },
+    });
 
-  //   if (!deletedFactory) {
-  //     throw new NotFoundException('Factory Not Found');
-  //   }
+    if (!deletedFactory) {
+      throw new NotFoundException('Factory Not Found');
+    }
 
-  //   return deletedFactory;
-  // }
+    return deletedFactory;
+  }
 }

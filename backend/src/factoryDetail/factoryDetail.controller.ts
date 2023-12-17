@@ -8,8 +8,8 @@ import {
   Put,
 } from '@nestjs/common';
 import { Public } from 'src/auth/decorator';
-import { FactoryDetailService } from './factoryDetail.service';
 import { FactoryDetailDto } from './dto/factoryDetail.dto';
+import { FactoryDetailService } from './factoryDetail.service';
 
 @Public()
 @Controller('factory-detail')
@@ -23,10 +23,10 @@ export class FactoryDetailController {
   }
 
   //   // Gets a factory detail by id
-  //   @Get(':id')
-  //   getFactoryDetailById(@Param('id') id: string) {
-  //     return this.factoryDetailService.getFactoryDetailById(id);
-  //   }
+  @Get(':id')
+  getFactoryDetailById(@Param('id') id: string) {
+    return this.factoryDetailService.getFactoryDetailById(id);
+  }
 
   //   // Inserts a factory detail
   @Post('')
@@ -35,23 +35,23 @@ export class FactoryDetailController {
   }
 
   //   // Updates a factory detail
-  //   @Put(':id')
-  //   async updateFactoryDetail(
-  //     @Param('id') id: string,
-  //     @Body() factoryDetail: FactoryDetailDto,
-  //   ) {
-  //     const updatedFactoryDetail =
-  //       await this.factoryDetailService.updateFactoryDetail(id, factoryDetail);
+  @Put(':id')
+  async updateFactoryDetail(
+    @Param('id') id: string,
+    @Body() factoryDetail: FactoryDetailDto,
+  ) {
+    const updatedFactoryDetail =
+      await this.factoryDetailService.updateFactoryDetail(id, factoryDetail);
 
-  //     return updatedFactoryDetail;
-  //   }
+    return updatedFactoryDetail;
+  }
 
   //   // Deletes a factory detail
-  //   @Delete(':id')
-  //   async deleteFactoryDetail(@Param('id') id: string) {
-  //     const deletedFactoryDetail =
-  //       await this.factoryDetailService.deleteFactoryDetail(id);
+  @Delete(':id')
+  async deleteFactoryDetail(@Param('id') id: string) {
+    const deletedFactoryDetail =
+      await this.factoryDetailService.deleteFactoryDetail(id);
 
-  //     return deletedFactoryDetail;
-  //   }
+    return deletedFactoryDetail;
+  }
 }
