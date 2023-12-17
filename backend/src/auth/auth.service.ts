@@ -84,6 +84,59 @@ export class AuthService {
     return tokens;
   }
 
+  //Logout the user
+  async logout(userId: number) {
+    await this.prisma.token.delete({
+      where: {
+        userId: userId,
+      },
+    });
+  }
+
+  //Refresh the user token
+  async refreshTokens(userId: number, refreshToken: string): Promise<Tokens> {
+    //find the user by id
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    //if user does not exist throw error
+    if (!user) {
+      throw new ForbiddenException('User not found');
+    }
+
+    //find the token in the database
+    const token = await this.prisma.token.findUnique({
+      where: {
+        userId: userId,
+      },
+    });
+
+    //if token does not exist throw error
+    if (!token) {
+      throw new ForbiddenException('Access Denied');
+    }
+
+    //compare the token
+    const tokenMatches = await argon.verify(token.token, refreshToken);
+
+    //if token does not match throw error
+    if (!tokenMatches) {
+      throw new ForbiddenException('Access Denied');
+    }
+
+    // return the saved user token
+    const tokens = await this.getTokens(
+      user.id,
+      user.name,
+      user.email,
+      user.roleId,
+    );
+    await this.updateRtHash(user.id, tokens.refresh_token);
+    return tokens;
+  }
+
   //Generate the access and refresh token
   async getTokens(
     userId: number,
