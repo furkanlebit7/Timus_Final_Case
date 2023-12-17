@@ -9,6 +9,7 @@ async function bootstrap() {
       whitelist: true, // This will remove any properties that don't have a matching DTO
     }),
   );
+
   await app.listen(8080);
 }
 bootstrap();

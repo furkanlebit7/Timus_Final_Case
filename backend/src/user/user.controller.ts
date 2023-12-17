@@ -1,13 +1,19 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { User } from '@prisma/client';
-import { GetUser } from 'src/auth/decorator';
-import { AtGuard } from 'src/auth/guard';
+// import { Body, Controller, Get, Post } from '@nestjs/common';
+// import { User } from '@prisma/client';
+// import { GetUser, Public } from 'src/auth/decorator';
+// import { UserService } from './user.service';
 
-@UseGuards(AtGuard)
-@Controller('user')
-export class UserController {
-  @Get('me')
-  getMe(@GetUser() user: User) {
-    return user;
-  }
-}
+// @Controller('user')
+// export class UserController {
+//   constructor(private readonly userService: UserService) {}
+//   @Get('me')
+//   getMe(@GetUser() user: User) {
+//     return user;
+//   }
+
+//   @Public()
+//   @Post('')
+//   async createUser(@Body() user: User) {
+//     return await this.userService.insertUser(user);
+//   }
+// }
