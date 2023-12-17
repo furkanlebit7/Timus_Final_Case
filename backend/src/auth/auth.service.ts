@@ -5,6 +5,7 @@ import * as argon from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { Tokens } from './types';
 @Injectable({})
 export class AuthService {
   constructor(
@@ -12,7 +13,9 @@ export class AuthService {
     private jwt: JwtService,
     private config: ConfigService,
   ) {}
-  async signup(dto: SignUpDto) {
+
+  //Signup the user
+  async signup(dto: SignUpDto): Promise<Tokens> {
     // generate the password hash
     const password = await argon.hash(dto.password);
 
@@ -32,7 +35,14 @@ export class AuthService {
       });
 
       // return the saved user token
-      return this.signToken(user.id, user.name, user.email, user.roleId);
+      const tokens = await this.getTokens(
+        user.id,
+        user.name,
+        user.email,
+        user.roleId,
+      );
+      await this.updateRtHash(user.id, tokens.refresh_token);
+      return tokens;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -42,8 +52,8 @@ export class AuthService {
       throw error;
     }
   }
-
-  async signin(dto: SignInDto) {
+  //Signin the user
+  async signin(dto: SignInDto): Promise<Tokens> {
     //find the user by email
     const user = await this.prisma.user.findUnique({
       where: {
@@ -64,27 +74,62 @@ export class AuthService {
     }
 
     // return the saved user token
-    return this.signToken(user.id, user.name, user.email, user.roleId);
+    const tokens = await this.getTokens(
+      user.id,
+      user.name,
+      user.email,
+      user.roleId,
+    );
+    await this.updateRtHash(user.id, tokens.refresh_token);
+    return tokens;
   }
-  async signToken(
+
+  //Generate the access and refresh token
+  async getTokens(
     userId: number,
     name: string,
     email: string,
     roleId: number,
-  ): Promise<{ access_token: string }> {
+  ): Promise<Tokens> {
     const payload = {
       sub: userId,
       name,
       email,
       roleId,
     };
-    const secret = this.config.get('JWT_SECRET');
+    const atSecret = this.config.get('JWT_SECRET');
+    const rtSecret = this.config.get('REFRESH_SECRET');
 
-    const token = await this.jwt.signAsync(payload, {
-      expiresIn: '15m',
-      secret: secret,
+    const [at, rt] = await Promise.all([
+      this.jwt.signAsync(payload, {
+        expiresIn: 60 * 15, // 15 minutes
+        secret: atSecret,
+      }),
+      this.jwt.signAsync(payload, {
+        expiresIn: 60 * 60 * 24 * 7, // 7 days
+        secret: rtSecret,
+      }),
+    ]);
+
+    return { access_token: at, refresh_token: rt };
+  }
+
+  //Hash the refresh token and save it in the database
+  async updateRtHash(userId: number, refreshToken: string) {
+    const hashedRt = await argon.hash(refreshToken);
+    //if user exist update the token else create a new token and user
+    await this.prisma.token.upsert({
+      where: {
+        userId: userId,
+      },
+      update: {
+        token: hashedRt,
+      },
+      create: {
+        userId: userId,
+        token: hashedRt,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
+      },
     });
-
-    return { access_token: token };
   }
 }

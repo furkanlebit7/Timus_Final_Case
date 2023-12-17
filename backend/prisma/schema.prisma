@@ -58,3 +58,14 @@ model FactoryDetail {
   factoryId       Int     @unique
   factoryRelation Factory @relation(fields: [factoryId], references: [id], onDelete: Cascade)
 }
+
+model Token {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    Int      @unique
+  token     String   @unique
+  expiresAt DateTime
+
+  @@map("tokens")
+}
